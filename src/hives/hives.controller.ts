@@ -18,6 +18,7 @@ export class HivesController {
     @Post('/:hive/records')
     async addRecord(@Body() body, @Param('hive') hiveId) {
         await this.hivesService.notifyAlive(hiveId)
+        console.log('New record!', body)
         if (isRecordInput(body)) {
             await this.recordsService.add({ ...body, hiveId })
         } else {
