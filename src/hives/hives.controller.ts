@@ -31,6 +31,6 @@ export class HivesController {
 
     @Get('/:hive')
     async getHive(@Param('hive') hiveId) {
-        await this.hivesService.get(hiveId)
+        return await this.hivesService.get(hiveId)
     }
 }
