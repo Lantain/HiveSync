@@ -41,7 +41,8 @@ export class HivesService {
     }
 
     async addRecord(hiveId: string, rec: Record) {
-        await this.firebase.firestore.collection(`hives/${hiveId}/records`).doc(`${rec.sensorId}-${moment().format('YYMMDD-hhmmss')}`).set({
+        const id = `${rec.sensorId}-${moment().format('YYMMDD-HHmmss')}`
+        await this.firebase.firestore.collection(`hives/${hiveId}/records`).doc(id).set({
             ...rec,
             createdAt: new Date()
         })
