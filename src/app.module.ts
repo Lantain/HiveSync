@@ -1,20 +1,31 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FirebaseModule } from 'nestjs-firebase';
-import { RecordsModule } from './records/records.module';
 import { HivesModule } from './hives/hives.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { SensorsModule } from './sensors/sensors.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    RecordsModule,
     HivesModule,
     AuthModule,
+    SensorsModule,
     UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    JwtModule.registerAsync({
+      useFactory(cfg: ConfigService) {
+          return {
+              secret: cfg.get("SECRET"),
+              global: true,
+              signOptions: { expiresIn: '7d' }
+          }
+      },
+      inject: [ConfigService]
+   }),
     FirebaseModule.forRootAsync({
       inject: [ConfigService],
       async useFactory(cfg: ConfigService) {

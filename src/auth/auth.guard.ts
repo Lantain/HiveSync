@@ -1,11 +1,16 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { FirebaseAdmin, InjectFirebaseAdmin } from "nestjs-firebase";
 import { Observable } from "rxjs";
+import { UsersService } from '../users/users.service';
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
     constructor(
-        @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
+        private readonly usersService: UsersService,
+        private readonly jwtService: JwtService,
+        private readonly configService: ConfigService
     ) {}
     
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -16,8 +21,14 @@ export class AuthGuard implements CanActivate {
         }
 
         try {
-            const payload = await this.firebase.auth.verifyIdToken(token)
-            request['user'] = payload
+            const payload = await this.jwtService.verifyAsync(
+                token,
+                {
+                  secret: this.configService.get('SECRET')
+                }
+            );
+
+            request['user'] = this.usersService.getUser(payload.email);
         } catch {
             throw new UnauthorizedException();
         }

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { FirebaseAdmin, InjectFirebaseAdmin } from "nestjs-firebase";
-import { Hive } from "./model";
+import { Hive, Record } from '../model';
 
 @Injectable()
 export class HivesService {
@@ -10,13 +10,17 @@ export class HivesService {
 
     async get(hiveId: string): Promise<Hive> {
         const hive = await this.firebase.firestore.collection('hives').doc(hiveId).get()
-        const recordsSnapshot = await this.firebase.firestore.collection('records').where('hiveId', '==', hiveId).get();
+        const recordsSnapshot = await this.firebase.firestore.collection('records').where('hiveId', '==', hiveId).orderBy('createdAt').limit(10).get();
         const records = recordsSnapshot.docs as any[]
         return {
             ...(hive.data() as Hive),
             records
         }
+    }
 
+    async getHives() {
+        const snapshot = await this.firebase.firestore.collection('hives').get();
+        return snapshot.docs
     }
 
     async create(hive: Hive) {
@@ -29,7 +33,14 @@ export class HivesService {
 
     async notifyAlive(hiveId: string) {
         await this.firebase.firestore.collection('hives').doc(hiveId).set({
-            lastSeenAt: Date.now()
+            lastSeenAt: new Date()
         }, { merge: true })
+    }
+
+    async addRecord(hiveId: string, rec: Record) {
+        await this.firebase.firestore.collection(`hives/${hiveId}/records`).add({
+            ...rec,
+            createdAt: Date.now()
+        })
     }
 }

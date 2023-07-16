@@ -1,13 +1,13 @@
-import { BadRequestException, Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { HivesService } from './hives.service';
-import { RecordsService } from "src/records/records.service";
-import { isRecordInput } from "src/records/model";
+import { AuthGuard } from "src/auth/auth.guard";
+import { UsersService } from "src/users/users.service";
 
 @Controller("hives")
 export class HivesController {
     constructor(
         private readonly hivesService: HivesService,
-        private readonly recordsService: RecordsService
+        private readonly usersService: UsersService
     ) {}
 
     @Post()
@@ -15,22 +15,27 @@ export class HivesController {
         await this.hivesService.create(body)
     }
 
-    @Post('/:hive/records')
-    async addRecord(@Body() body, @Param('hive') hiveId) {
-        await this.hivesService.notifyAlive(hiveId)
-        console.log('New record!', body)
-        if (isRecordInput(body)) {
-            await this.recordsService.add({ ...body, hiveId })
-        } else {
-            throw new BadRequestException()
-        }
-        return {
-            success: true
-        }
-    }
-
     @Get('/:hive')
     async getHive(@Param('hive') hiveId) {
         return await this.hivesService.get(hiveId)
+    }
+    
+    @Post('/:hive/connect')
+    @UseGuards(AuthGuard)
+    async connectHive(@Param('hive') hiveId, @Req() req) {
+        const hive =  await this.hivesService.get(hiveId)
+        if (hive) {
+            await this.usersService.connectHive(req.user.id, hiveId)
+        }
+    }
+
+    @Get()
+    @UseGuards(AuthGuard)
+    async myHives(@Req() req) {
+        return Promise.all(
+            (req.user.hiveIds || []).map(
+                id => this.getHive(id)
+            )
+        )
     }
 }

@@ -1,10 +1,28 @@
+export interface User {
+    name: string
+    hiveIds: string[]
+}
+
+export interface Hive {
+    id?: string
+    name: string
+    lastSeenAt?: number
+    records?: Record[]
+}
+
 export interface Record {
     hiveId?: string
+    sensorId?: string
     temperature?: number
     humidity?: number
     co2?: number
     weight?: number
     payload?: string
+}
+
+export interface Sensor {
+    id?: string
+    name: string
 }
 
 export const isRecordInput = (value): value is Record => 
