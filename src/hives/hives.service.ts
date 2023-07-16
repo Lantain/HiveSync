@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { FirebaseAdmin, InjectFirebaseAdmin } from "nestjs-firebase";
 import { Hive, Record } from '../model';
+import * as moment from 'moment'
 
 @Injectable()
 export class HivesService {
@@ -38,9 +39,9 @@ export class HivesService {
     }
 
     async addRecord(hiveId: string, rec: Record) {
-        await this.firebase.firestore.collection(`hives/${hiveId}/records`).add({
+        await this.firebase.firestore.collection(`hives/${hiveId}/records`).doc(`${rec.sensorId}-${moment().format('YYMMDD-hhmmss')}`).set({
             ...rec,
-            createdAt: Date.now()
+            createdAt: new Date()
         })
     }
 }
