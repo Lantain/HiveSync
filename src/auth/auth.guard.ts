@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate {
                 }
             );
 
-            request['user'] = this.usersService.getUser(payload.email);
+            request['user'] = await this.usersService.getUser(payload.email)
         } catch {
             throw new UnauthorizedException();
         }
@@ -37,7 +37,7 @@ export class AuthGuard implements CanActivate {
     }
 
     private extractTokenFromHeader(request: Request): string | undefined {
-        const [type, token] = request.headers.get("authorization")?.split(' ') ?? [];
+        const [type, token] = request.headers["authorization"]?.split(' ') ?? [];
         return type === 'Bearer' ? token : undefined;
       }
 }

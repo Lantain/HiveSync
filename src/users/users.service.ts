@@ -14,13 +14,14 @@ export class UsersService {
             return usersSnapshot
         } else {
             await this.firebase.firestore.collection('users').doc(fuser.email).set({
+                name: fuser.name,
                 hives: []
             });
         }
     }
 
-    async connectHive(userId: string, hiveId: string) {
-        await this.firebase.firestore.doc(`users/${userId}`).update({
+    async connectHive(email: string, hiveId: string) {
+        await this.firebase.firestore.doc(`users/${email}`).update({
             hives: firestore.FieldValue.arrayUnion(
                 this.firebase.firestore.doc(`hives/${hiveId}`)
             )
@@ -29,6 +30,10 @@ export class UsersService {
 
     async getUser(email) {
         const userSnapshot = await this.firebase.firestore.collection('users').doc(email).get()
-        return userSnapshot.exists ? userSnapshot.data() : null
+        return userSnapshot.exists ? {
+            id: email,
+            email,
+            ...userSnapshot.data()
+        } : null
     }
 }

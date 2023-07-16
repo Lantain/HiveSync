@@ -23,9 +23,12 @@ export class HivesController {
     @Post('/:hive/connect')
     @UseGuards(AuthGuard)
     async connectHive(@Param('hive') hiveId, @Req() req) {
+        if (req.user.hives?.find(h => h.path === `hives/${hiveId}`)) {
+            return
+        }
         const hive =  await this.hivesService.get(hiveId)
         if (hive) {
-            await this.usersService.connectHive(req.user.id, hiveId)
+            await this.usersService.connectHive(req.user.email, hiveId)
         }
     }
 

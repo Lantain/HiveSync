@@ -11,10 +11,12 @@ export class HivesService {
 
     async get(hiveId: string): Promise<Hive> {
         const hive = await this.firebase.firestore.collection('hives').doc(hiveId).get()
-        const recordsSnapshot = await this.firebase.firestore.collection('records').where('hiveId', '==', hiveId).orderBy('createdAt').limit(10).get();
-        const records = recordsSnapshot.docs as any[]
+        if (!hive.exists) return null
+        const hiveData = hive.data()
+        const recordsSnapshot = await this.firebase.firestore.collection(`hives/${hiveId}/records`).orderBy('createdAt', 'desc').limit(10).get();
+        const records = recordsSnapshot.docs.map(d => d.data()) as any[]
         return {
-            ...(hive.data() as Hive),
+            ...(hiveData as Hive),
             records
         }
     }
