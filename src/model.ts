@@ -1,6 +1,6 @@
 export interface User {
     name: string
-    hiveIds: string[]
+    hives: string[]
 }
 
 export interface Hive {

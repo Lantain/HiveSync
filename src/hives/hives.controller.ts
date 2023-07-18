@@ -35,10 +35,11 @@ export class HivesController {
     @Get()
     @UseGuards(AuthGuard)
     async myHives(@Req() req) {
-        return Promise.all(
-            (req.user.hiveIds || []).map(
-                id => this.getHive(id)
+        const hives = await Promise.all(
+            (req.user.hives || []).map(
+                h => this.getHive(h.id)
             )
         )
+        return hives
     }
 }

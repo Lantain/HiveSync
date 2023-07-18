@@ -15,7 +15,11 @@ export class HivesService {
         const hiveData = hive.data()
         const recordsSnapshot = await this.firebase.firestore.collection(`hives/${hiveId}/records`).orderBy('createdAt', 'desc').limit(10).get();
         const records = recordsSnapshot.docs.map(d => d.data()) as any[]
+        hiveData.sensors = (await Promise.all(
+            hiveData.sensors.map(s => s.get())
+        )).map(s => s.data())
         return {
+            id: hiveId,
             ...(hiveData as Hive),
             records
         }
