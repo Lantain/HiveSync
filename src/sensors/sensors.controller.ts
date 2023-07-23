@@ -1,6 +1,7 @@
-import { Body, Controller, Param, Post, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Param, Post, BadRequestException, UseGuards } from '@nestjs/common';
 import { SensorsService } from "./sensors.service";
 import { isRecordInput } from "src/model";
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller("sensors")
 export class SensorsController {

@@ -18,11 +18,13 @@ export interface Record {
     co2?: number
     weight?: number
     payload?: string
+    createdAt?: number
 }
 
 export interface Sensor {
     id?: string
     name: string
+    lastSeenAt?: number
 }
 
 export const isRecordInput = (value): value is Record => 

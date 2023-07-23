@@ -4,9 +4,10 @@ import { HivesController } from './hives.controller';
 import { UsersModule } from 'src/users/users.module';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { RecordsModule } from 'src/records/records.module';
 
 @Module({
-    imports: [UsersModule, JwtModule.registerAsync({
+    imports: [UsersModule, RecordsModule, JwtModule.registerAsync({
         useFactory(cfg: ConfigService) {
             return {
                 secret: cfg.get("SECRET"),

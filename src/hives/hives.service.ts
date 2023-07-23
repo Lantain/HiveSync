@@ -1,27 +1,24 @@
 import { Injectable } from "@nestjs/common";
 import { FirebaseAdmin, InjectFirebaseAdmin } from "nestjs-firebase";
 import { Hive, Record } from '../model';
-import * as moment from 'moment'
+import { RecordsService } from '../records/records.service';
+import { firebaseDateToMilliseconds } from "src/util";
 
 @Injectable()
 export class HivesService {
     constructor(
         @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
+        private readonly recordsService: RecordsService
     ) {}
 
     async get(hiveId: string): Promise<Hive> {
         const hive = await this.firebase.firestore.collection('hives').doc(hiveId).get()
         if (!hive.exists) return null
         const hiveData = hive.data()
-        const recordsSnapshot = await this.firebase.firestore.collection(`hives/${hiveId}/records`).orderBy('createdAt', 'desc').limit(10).get();
-        const records = recordsSnapshot.docs.map(d => d.data()) as any[]
-        hiveData.sensors = (await Promise.all(
-            hiveData.sensors.map(s => s.get())
-        )).map(s => s.data())
         return {
             id: hiveId,
             ...(hiveData as Hive),
-            records
+            lastSeenAt: firebaseDateToMilliseconds(hiveData.lastSeenAt)
         }
     }
 
@@ -38,17 +35,19 @@ export class HivesService {
         })
     }
 
-    async notifyAlive(hiveId: string) {
-        await this.firebase.firestore.collection('hives').doc(hiveId).set({
+    async addRecord(hiveId: string, rec: Record) {
+        await this.recordsService.addRecord(hiveId, rec)
+        const hive = await this.firebase.firestore.collection('hives').doc(hiveId).get()
+        const hiveData = hive.data()
+        const existingRecord = hiveData.rec;
+        
+        if (rec.temperature) existingRecord.temperature = rec.temperature;
+        if (rec.humidity) existingRecord.humidity = rec.humidity;
+        if (rec.weight) existingRecord.weight = rec.weight;
+
+        await this.firebase.firestore.doc(`hives/${hiveId}`).set({
+            rec: existingRecord,
             lastSeenAt: new Date()
         }, { merge: true })
-    }
-
-    async addRecord(hiveId: string, rec: Record) {
-        const id = `${rec.sensorId}-${moment().format('YYMMDD-HHmmss')}`
-        await this.firebase.firestore.collection(`hives/${hiveId}/records`).doc(id).set({
-            ...rec,
-            createdAt: new Date()
-        })
     }
 }

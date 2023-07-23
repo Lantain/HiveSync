@@ -1,0 +1,1 @@
+export const firebaseDateToMilliseconds = (date: { _seconds: number }) => date._seconds * 1000;

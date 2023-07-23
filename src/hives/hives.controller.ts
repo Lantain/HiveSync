@@ -11,11 +11,13 @@ export class HivesController {
     ) {}
 
     @Post()
+    @UseGuards(AuthGuard)
     async createHive(@Body() body) {
         await this.hivesService.create(body)
     }
 
     @Get('/:hive')
+    @UseGuards(AuthGuard)
     async getHive(@Param('hive') hiveId) {
         return await this.hivesService.get(hiveId)
     }

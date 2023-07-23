@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { SensorsModule } from './sensors/sensors.module';
 import { JwtModule } from '@nestjs/jwt';
+import { RecordsModule } from './records/records.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
     AuthModule,
     SensorsModule,
     UsersModule,
+    RecordsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

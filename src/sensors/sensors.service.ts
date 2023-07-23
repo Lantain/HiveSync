@@ -7,7 +7,7 @@ import { Sensor, Record } from "src/model";
 export class SensorsService {
     constructor(
         @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
-        private readonly hivesService: HivesService,
+        private readonly hivesService: HivesService
     ) {}
 
     async create(sensor: Sensor) {
@@ -29,8 +29,7 @@ export class SensorsService {
         const snapshot = await this.firebase.firestore.collection('hives').where('sensors', 'array-contains', this.firebase.firestore.doc(`/sensors/${sensorId}`)).get()
         const hive = snapshot.docs.length ? snapshot.docs[0] : null
         if (hive?.id) {
-            await this.hivesService.notifyAlive(hive.id)
-            await this.hivesService.addRecord(hive.id, { sensorId, ...data })
+            await this.hivesService.addRecord(hive.id, { sensorId, ...data });
         }
     }
 }
