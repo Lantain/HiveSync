@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { HivesService } from './hives.service';
 import { AuthGuard } from "src/auth/auth.guard";
 import { UsersService } from "src/users/users.service";
@@ -26,12 +26,15 @@ export class HivesController {
     @UseGuards(AuthGuard)
     async connectHive(@Param('hive') hiveId, @Req() req) {
         if (req.user.hives?.find(h => h.path === `hives/${hiveId}`)) {
-            return
+            return true
         }
         const hive =  await this.hivesService.get(hiveId)
         if (hive) {
             await this.usersService.connectHive(req.user.email, hiveId)
+        } else {
+            throw new NotFoundException()
         }
+        return true
     }
 
     @Get()

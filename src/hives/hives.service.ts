@@ -39,11 +39,13 @@ export class HivesService {
         await this.recordsService.addRecord(hiveId, rec)
         const hive = await this.firebase.firestore.collection('hives').doc(hiveId).get()
         const hiveData = hive.data()
+        if (!hiveData.rec) {
+            hiveData.rec = {}
+        }
         const existingRecord = hiveData.rec;
-        
-        if (rec.temperature) existingRecord.temperature = rec.temperature;
-        if (rec.humidity) existingRecord.humidity = rec.humidity;
-        if (rec.weight) existingRecord.weight = rec.weight;
+        if (rec?.temperature) existingRecord.temperature = rec.temperature;
+        if (rec?.humidity) existingRecord.humidity = rec.humidity;
+        if (rec?.weight) existingRecord.weight = rec.weight;
 
         await this.firebase.firestore.doc(`hives/${hiveId}`).set({
             rec: existingRecord,
